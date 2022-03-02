@@ -20,6 +20,7 @@ public:
 	Object2D() { object_number_ = number_objects_++; }
 	Object2D(double, ...);
 	void points(double, ...);
+	void addPoint(double, double);
 
 	void moving(double, double);
 	void scalingByAxes(double, double);
@@ -28,11 +29,15 @@ public:
 
 	void installPen(COLORREF, int);
 	void draw(HDC) const;
+	void drawClosedContour(HDC) const;
 	void drawBresenham(HDC) const;
 
 	void changePoint() { action_point_ == points_.size() - 1 ? action_point_ = 0 : action_point_++; }
 	static unsigned int numberObjects() { return number_objects_; }
 	static void changeObject() { action_object_ == number_objects_ - 1 ? action_object_ = 0 : action_object_++; }
 	static unsigned int activeObject() { return action_object_; }
+	void regularPolygon(int, double, double, double);
+
+	~Object2D() { points_.clear(); }
 };
 #endif OBJECT2D_H

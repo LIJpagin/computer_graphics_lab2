@@ -1,19 +1,27 @@
 #include "Object2D.h"
+#include <vector>
+#include <ctime>
 
 char szClassName[] = "CG_WAPI_Template";
 const int WidthWndClass = 600, HeightWndClass = 600;
-Object2D objects[] = { {2, 200., 200., 400., 400.}, {2, 400., 200., 200., 400.},
-					   {2, 200., 200., 200., 400.}, {2, 400., 200., 400., 400.} };
+std::vector <Object2D> objects(4);
 
+void setup() {
+	srand(time(NULL));
+	int vertices = 3;
+	COLORREF color = 0;
+	for (auto i = 0; i < objects.size(); i++) {
+		color = rand() % 256, color <<= 8, color |= rand() % 256, color <<= 8, color |= rand() % 256;
+		objects[i].installPen(color, 3);
+		objects[i].regularPolygon(vertices++, rand() % (WidthWndClass - 201) + 100,
+			rand() % (HeightWndClass - 201) + 10, rand() % 100 + 50);
+	}
+}
 void draw(HDC hdc) {
-	objects[0].installPen(0x0092CC, 3);
-	objects[1].installPen(0xDCD427, 3);
-	objects[2].installPen(0x779933, 3);
-	objects[3].installPen(0xFF3333, 3);
-	objects[0].draw(hdc);
-	objects[1].draw(hdc);
-	objects[2].drawBresenham(hdc);
-	objects[3].drawBresenham(hdc);
+	for (auto i = 0; i < objects.size(); i++)
+		//objects[i].draw(hdc);
+		objects[i].drawClosedContour(hdc);
+		//objects[i].drawBresenham(hdc);
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam) {
@@ -86,6 +94,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	HWND hWnd;
 	MSG lpMsg;
 	WNDCLASS WndClass;
+	setup();
 
 	// Заполняем структуру класса окна
 	WndClass.style = CS_HREDRAW | CS_VREDRAW;

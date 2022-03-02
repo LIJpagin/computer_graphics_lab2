@@ -14,6 +14,12 @@ Object2D::Object2D(double coord, ...) {
 	va_end(vl);
 }
 
+void Object2D::addPoint(double x, double y) {
+	points_.resize(points_.size() + 1);
+	points_[points_.size() - 1].x = x;
+	points_[points_.size() - 1].y = y;
+}
+
 void Object2D::installPen(COLORREF color_pen, int width_pen) {
 	width_pen_ = width_pen;
 	color_pen_ = color_pen;
@@ -106,4 +112,35 @@ void Object2D::drawBresenham(HDC hdc) const {
 		(int)round(points_[action_point_].x + width_pen_ / 2),
 		(int)round(points_[action_point_].y + width_pen_ / 2));
 	DeleteObject(hPen);
+}
+
+void Object2D::drawClosedContour(HDC hdc) const {
+	HPEN hPen1;
+	hPen1 = CreatePen(PS_DASHDOT, width_pen_, object_number_ == action_object_ ? 0xFFFFFF : color_pen_);
+	SelectObject(hdc, hPen1);
+	MoveToEx(hdc, (int)round(points_[0].x), (int)round(points_[0].y), NULL);
+	for (auto i = 1; i < points_.size(); i++)
+		LineTo(hdc, (int)round(points_[i].x), (int)round(points_[i].y));
+	LineTo(hdc, (int)round(points_[0].x), (int)round(points_[0].y));
+	DeleteObject(hPen1);
+
+	HPEN hPen2;
+	hPen2 = CreatePen(PS_DASHDOT, width_pen_, 0x0000FF);
+	SelectObject(hdc, hPen2);
+	Ellipse(hdc, (int)round(points_[action_point_].x - width_pen_ / 2),
+		(int)round(points_[action_point_].y - width_pen_ / 2),
+		(int)round(points_[action_point_].x + width_pen_ / 2),
+		(int)round(points_[action_point_].y + width_pen_ / 2));
+	DeleteObject(hPen2);
+}
+
+void Object2D::regularPolygon(int vertices, double x, double y, double R) {
+	double angle = 0;
+	if (points_.size()) points_.clear();
+	points_.resize(vertices);
+	for (auto i = 0; i < vertices; i++) {
+		points_[i].x = x + R * cos(angle * PI / 180); 
+		points_[i].y = y + R * sin(angle * PI / 180);
+		angle = angle + 360 / vertices;
+	}
 }
